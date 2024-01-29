@@ -10,6 +10,12 @@
   }
 }
 
+.no {
+  display: flex;
+  height: 550px;
+  justify-content: center;
+  align-items: center;
+}
 @media screen and (min-width: 768px) {
   .all-products-container {
     margin-left: 30px;
@@ -29,7 +35,10 @@
     font-size: 32px;
   }
 }
-
+.noproductView {
+  width: 250px;
+  height: 250px;
+}
 .products-loader-container {
   display: flex;
   justify-content: center;
@@ -47,4 +56,15 @@
   display: flex;
   flex-wrap: wrap;
   padding-left: 0;
+}
+.unordered {
+  padding: 0px;
+}
+.reset {
+  border: 1px solid blue;
+  background-color: transparent;
+  color: blue;
+  margin-left: 40px;
+  padding: 8px;
+  cursor: pointer;
 }

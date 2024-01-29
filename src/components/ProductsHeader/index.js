@@ -8,9 +8,15 @@ const ProductsHeader = props => {
     changeSortby(event.target.value)
   }
 
+  const inputChange = event => {
+    const {inputValue} = props
+    inputValue(event.target.value)
+  }
+
   const changeInput = event => {
+    event.preventDefault()
     const {searching} = props
-    console.log('hii')
+    console.log(event.target.value)
     searching(event.target.value)
   }
 
@@ -18,14 +24,19 @@ const ProductsHeader = props => {
 
   return (
     <div className="products-header">
-      <div className="inputContainer">
-        <input className="InputElement" type="search" onChange={changeInput} />
+      <form className="inputContainer" onSubmit={changeInput}>
+        <input
+          className="InputElement"
+          type="search"
+          onChange={inputChange}
+          placeholder="Search"
+        />
         <img
           src="https://assets.ccbp.in/frontend/react-js/app-store/app-store-search-img.png"
           className="search"
           alt="search"
         />
-      </div>
+      </form>
       <h1 className="products-list-heading">All Products</h1>
       <div className="sort-by-container">
         <BsFilterRight className="sort-by-icon" />

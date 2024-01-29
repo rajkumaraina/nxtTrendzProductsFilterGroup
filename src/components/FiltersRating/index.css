@@ -1,0 +1,27 @@
+.rating {
+  border: 0 none;
+  cursor: pointer;
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+}
+.ratingHeading {
+  color: #333333;
+  font-weight: bold;
+  margin: 0;
+  margin-bottom: 15px;
+}
+.ratingList {
+  list-style-type: none;
+  display: flex;
+}
+.active {
+  color: blue;
+}
+.ratingImg {
+  width: 145px;
+  height: 35px;
+  margin: 0;
+  margin-right: 8px;
+  padding: 0;
+}

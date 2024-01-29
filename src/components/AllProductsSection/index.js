@@ -4,6 +4,7 @@ import Cookies from 'js-cookie'
 
 import FiltersGroup from '../FiltersGroup'
 import ProductCard from '../ProductCard'
+import FiltersRating from '../FiltersRating'
 import ProductsHeader from '../ProductsHeader'
 
 import './index.css'
@@ -12,24 +13,35 @@ const categoryOptions = [
   {
     name: 'Clothing',
     categoryId: '1',
+    isActive: false,
   },
   {
     name: 'Electronics',
     categoryId: '2',
+    isActive: false,
   },
   {
     name: 'Appliances',
     categoryId: '3',
+    isActive: false,
   },
   {
     name: 'Grocery',
     categoryId: '4',
+    isActive: false,
   },
   {
     name: 'Toys',
     categoryId: '5',
+    isActive: false,
   },
 ]
+
+const Views = {
+  initial: 'Initial',
+  success: 'Success',
+  failure: 'Failure',
+}
 
 const sortbyOptions = [
   {
@@ -47,30 +59,39 @@ const ratingsList = [
     ratingId: '4',
     imageUrl:
       'https://assets.ccbp.in/frontend/react-js/rating-four-stars-img.png',
+    isActive: false,
   },
   {
     ratingId: '3',
     imageUrl:
       'https://assets.ccbp.in/frontend/react-js/rating-three-stars-img.png',
+    isActive: false,
   },
   {
     ratingId: '2',
     imageUrl:
       'https://assets.ccbp.in/frontend/react-js/rating-two-stars-img.png',
+    isActive: false,
   },
   {
     ratingId: '1',
     imageUrl:
       'https://assets.ccbp.in/frontend/react-js/rating-one-star-img.png',
+    isActive: false,
   },
 ]
 
 class AllProductsSection extends Component {
   state = {
     productsList: [],
+    initialcategoryOptions: categoryOptions,
+    initialratingsList: ratingsList,
     isLoading: false,
     activeOptionId: sortbyOptions[0].optionId,
-    searchInput: '',
+    title: '',
+    category: '',
+    rating: '',
+    view: Views.initial,
   }
 
   componentDidMount() {
@@ -89,8 +110,8 @@ class AllProductsSection extends Component {
 
     // TODO: Update the code to get products with filters applied
 
-    const {activeOptionId} = this.state
-    const apiUrl = `https://apis.ccbp.in/products?sort_by=${activeOptionId}`
+    const {activeOptionId, title, category, rating, view} = this.state
+    const apiUrl = `https://apis.ccbp.in/products?sort_by=${activeOptionId}&category=${category}&title_search=${title}&rating=${rating}`
     const options = {
       headers: {
         Authorization: `Bearer ${jwtToken}`,
@@ -98,6 +119,7 @@ class AllProductsSection extends Component {
       method: 'GET',
     }
     const response = await fetch(apiUrl, options)
+    console.log(response.status)
     if (response.ok) {
       const fetchedData = await response.json()
       const updatedData = fetchedData.products.map(product => ({
@@ -111,36 +133,113 @@ class AllProductsSection extends Component {
       this.setState({
         productsList: updatedData,
         isLoading: false,
+        view: Views.success,
       })
+    } else {
+      this.setState({view: Views.failure})
     }
   }
 
-  searching = item => {
-    this.setState({searchInput: item})
+  inputValue = item => {
+    this.setState({title: item})
+  }
+
+  searching = () => {
+    this.getProducts()
+  }
+
+  choosenCategory = id => {
+    this.setState(
+      prevState => ({
+        initialcategoryOptions: prevState.initialcategoryOptions.map(each => {
+          if (each.categoryId === id) {
+            return {...each, isActive: true}
+          }
+          return {...each, isActive: false}
+        }),
+        category: id,
+      }),
+      this.getProducts,
+    )
+  }
+
+  choosenRating = id => {
+    this.setState(
+      prevState => ({
+        initialratingsList: prevState.initialratingsList.map(each => {
+          if (each.ratingId === id) {
+            return {...each, isActive: true}
+          }
+          return {...each, isActive: false}
+        }),
+        rating: id,
+      }),
+      this.getProducts,
+    )
+  }
+
+  resetFilters = () => {
+    this.setState(
+      prevState => ({
+        initialratingsList: prevState.initialratingsList.map(each => ({
+          ratingId: each.ratingId,
+          imageUrl: each.imageUrl,
+          isActive: false,
+        })),
+        initialcategoryOptions: prevState.initialcategoryOptions.map(each => ({
+          categoryId: each.categoryId,
+          name: each.name,
+          isActive: false,
+        })),
+        title: '',
+        category: '',
+        rating: '',
+        activeOptionId: sortbyOptions[0].optionId,
+      }),
+      this.getProducts,
+    )
   }
 
   renderProductsList = () => {
-    const {productsList, activeOptionId, searchInput} = this.state
+    const {productsList, activeOptionId, view} = this.state
+    let noProduct
+
+    switch (view) {
+      case Views.success:
+        if (productsList.length === 0) {
+          noProduct = true
+        } else {
+          noProduct = false
+        }
+
+        return (
+          <div className="all-products-container">
+            {noProduct ? (
+              <div className="no">
+                <img
+                  src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-no-products-view.png"
+                  alt="no products"
+                  className="noproductView"
+                />
+              </div>
+            ) : (
+              <ul className="products-list">
+                {productsList.map(product => (
+                  <ProductCard productData={product} key={product.id} />
+                ))}
+              </ul>
+            )}
+          </div>
+        )
+
+      case Views.failure:
+        return this.renderFailure()
+
+      default:
+        return null
+    }
 
     // TODO: Add No Products View
-
-    const newList = productsList.filter(each => {
-      const title = each.title.toLowerCase()
-      const searchItem = searchInput.toLowerCase()
-      console.log(title.includes(searchItem))
-      return title.includes(searchItem)
-    })
-    console.log(newList)
-
-    return (
-      <div className="all-products-container">
-        <ul className="products-list">
-          {newList.map(product => (
-            <ProductCard productData={product} key={product.id} />
-          ))}
-        </ul>
-      </div>
-    )
   }
 
   renderLoader = () => (
@@ -150,9 +249,23 @@ class AllProductsSection extends Component {
   )
 
   // TODO: Add failure view
+  renderFailure = () => (
+    <div className="no">
+      <img
+        src="https://assets.ccbp.in/frontend/react-js/nxt-trendz/nxt-trendz-products-error-view.png "
+        alt="products failure"
+        className="noproductView"
+      />
+    </div>
+  )
 
   render() {
-    const {isLoading, activeOptionId} = this.state
+    const {
+      isLoading,
+      activeOptionId,
+      initialcategoryOptions,
+      initialratingsList,
+    } = this.state
 
     return (
       <>
@@ -161,12 +274,39 @@ class AllProductsSection extends Component {
           sortbyOptions={sortbyOptions}
           changeSortby={this.changeSortby}
           searching={this.searching}
+          inputValue={this.inputValue}
         />
         <div className="all-products-section">
           {/* TODO: Update the below element */}
-
-          <FiltersGroup />
-
+          <div className="filter">
+            <ul className="unordered">
+              <li className="categoryHeading list">
+                <h1>Category</h1>
+              </li>
+              {initialcategoryOptions.map(each => (
+                <FiltersGroup
+                  item={each}
+                  key={each.categoryId}
+                  choosenCategory={this.choosenCategory}
+                />
+              ))}
+            </ul>
+            <ul className="unordered">
+              <li className="ratingHeading list">
+                <h1>Rating</h1>
+              </li>
+              {initialratingsList.map(each => (
+                <FiltersRating
+                  item={each}
+                  key={each.ratingId}
+                  choosenRating={this.choosenRating}
+                />
+              ))}
+            </ul>
+            <button className="reset" type="button" onClick={this.resetFilters}>
+              Clear Filters
+            </button>
+          </div>
           {isLoading ? this.renderLoader() : this.renderProductsList()}
         </div>
       </>
