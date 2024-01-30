@@ -13,11 +13,18 @@ const ProductsHeader = props => {
     inputValue(event.target.value)
   }
 
+  const enterButton = event => {
+    const {searching} = props
+    console.log(event.key)
+    console.log(event.target.value)
+    if (event.key === 'Enter') {
+      searching(event.target.value)
+    }
+  }
+
   const changeInput = event => {
     event.preventDefault()
     const {searching} = props
-    console.log(event.target.value)
-    searching(event.target.value)
   }
 
   const {sortbyOptions, activeOptionId} = props
@@ -29,6 +36,7 @@ const ProductsHeader = props => {
           className="InputElement"
           type="search"
           onChange={inputChange}
+          onKeyDown={enterButton}
           placeholder="Search"
         />
         <img

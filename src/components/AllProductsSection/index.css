@@ -12,6 +12,7 @@
 
 .no {
   display: flex;
+  flex-direction: column;
   height: 550px;
   justify-content: center;
   align-items: center;

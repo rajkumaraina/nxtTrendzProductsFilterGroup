@@ -41,6 +41,7 @@ const Views = {
   initial: 'Initial',
   success: 'Success',
   failure: 'Failure',
+  loading: 'Loading',
 }
 
 const sortbyOptions = [
@@ -81,11 +82,19 @@ const ratingsList = [
   },
 ]
 
+const apiStatusConstants = {
+  initial: 'INITIAL',
+  success: 'SUCCESS',
+  failure: 'FAILURE',
+  inProgress: 'IN_PROGRESS',
+}
+
 class AllProductsSection extends Component {
   state = {
     productsList: [],
     initialcategoryOptions: categoryOptions,
     initialratingsList: ratingsList,
+    apiStatus: apiStatusConstants.initial,
     isLoading: false,
     activeOptionId: sortbyOptions[0].optionId,
     title: '',
@@ -204,14 +213,14 @@ class AllProductsSection extends Component {
     const {productsList, activeOptionId, view} = this.state
     let noProduct
 
+    if (productsList.length === 0) {
+      noProduct = true
+    } else {
+      noProduct = false
+    }
+
     switch (view) {
       case Views.success:
-        if (productsList.length === 0) {
-          noProduct = true
-        } else {
-          noProduct = false
-        }
-
         return (
           <div className="all-products-container">
             {noProduct ? (
@@ -221,6 +230,10 @@ class AllProductsSection extends Component {
                   alt="no products"
                   className="noproductView"
                 />
+                <h1 className="no-products-heading">No Products Found</h1>
+                <p className="no-products-description">
+                  We could not find any products. Try other filters.
+                </p>
               </div>
             ) : (
               <ul className="products-list">
@@ -234,6 +247,9 @@ class AllProductsSection extends Component {
 
       case Views.failure:
         return this.renderFailure()
+
+      case Views.loading:
+        return this.renderLoader()
 
       default:
         return null
@@ -262,6 +278,7 @@ class AllProductsSection extends Component {
   render() {
     const {
       isLoading,
+      apiStatus,
       activeOptionId,
       initialcategoryOptions,
       initialratingsList,
@@ -307,7 +324,7 @@ class AllProductsSection extends Component {
               Clear Filters
             </button>
           </div>
-          {isLoading ? this.renderLoader() : this.renderProductsList()}
+          {this.renderProductsList()}
         </div>
       </>
     )
